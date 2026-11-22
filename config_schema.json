@@ -24,10 +24,11 @@
     },
     "display_duration": {
       "type": "integer",
-      "title": "Display duration (seconds)",
+      "title": "Seconds per film",
+      "description": "How long each film stays on the display before moving to the next one.",
       "minimum": 5,
       "maximum": 120,
-      "default": 15
+      "default": 10
     }
   },
   "additionalProperties": false

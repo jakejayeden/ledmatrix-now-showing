@@ -7,11 +7,12 @@ the films so their showtimes can be read on a 32-pixel-high display.
 
 ## Display
 
-- `NOW SHOWING` at the upper left and today's date at the upper right
+- `NOW SHOWING @ SAVOY` at the upper left and today's date at the upper right
 - A thin red divider
 - The film title in red and today's available showtimes below it
 - One film per page, rotating through today's programme
-- Long titles or time lists are split across consecutive pages to fit the panel
+- Ratings and common festival/programme prefixes are removed to keep titles tidy
+- Titles wrap cleanly and long time lists continue on the next page
 
 The same layout runs at 128x32 and 256x32. At 128 pixels wide the date is
 compact (`22 NOV`); wider panels show the weekday and year.
@@ -33,7 +34,7 @@ Python standard library and needs an internet connection to refresh listings.
 | --- | --- | --- |
 | Savoy Nottingham | enabled | Include the Nottingham venue |
 | Refresh interval | 30 minutes | How often to fetch the public booking page |
-| Display duration | 15 seconds | How long to show each film before moving on |
+| Seconds per film | 10 seconds | Editable in the LEDMatrix Plugin Manager settings, from 5 to 120 seconds |
 
 ## Data source
 

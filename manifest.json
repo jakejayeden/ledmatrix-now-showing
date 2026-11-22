@@ -1,7 +1,7 @@
 {
   "id": "now-showing-cinema",
   "name": "Now Showing Cinema",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": "jakejayeden",
   "description": "Today's cinema listings on your LED matrix, starting with Savoy Nottingham.",
   "entry_point": "manager.py",
@@ -10,5 +10,14 @@
   "tags": ["cinema", "films", "showtimes", "nottingham"],
   "display_modes": ["now-showing-cinema"],
   "compatible_versions": [">=2.0.0"],
-  "config_schema": "config_schema.json"
+  "config_schema": "config_schema.json",
+  "last_updated": "2026-11-22",
+  "versions": [
+    {
+      "version": "0.2.0",
+      "released": "2026-11-22",
+      "ledmatrix_min_version": "2.0.0",
+      "notes": "Adds the full SAVOY header, clean film-title parsing, and an adjustable 10-second default per film."
+    }
+  ]
 }

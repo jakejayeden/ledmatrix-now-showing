@@ -3,6 +3,6 @@
     "enabled": true,
     "savoy_nottingham": true,
     "refresh_minutes": 30,
-    "display_duration": 15
+    "display_duration": 10
   }
 }
