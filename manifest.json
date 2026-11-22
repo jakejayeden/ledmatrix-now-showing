@@ -1,7 +1,7 @@
 {
   "id": "now-showing-cinema",
   "name": "Now Showing Cinema",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "author": "jakejayeden",
   "description": "Today's cinema listings on your LED matrix, starting with Savoy Nottingham.",
   "entry_point": "manager.py",
@@ -14,10 +14,10 @@
   "last_updated": "2026-11-22",
   "versions": [
     {
-      "version": "0.2.0",
+      "version": "0.3.0",
       "released": "2026-11-22",
       "ledmatrix_min_version": "2.0.0",
-      "notes": "Adds the full SAVOY header, clean film-title parsing, and an adjustable 10-second default per film."
+      "notes": "Matches the NCT bus plugin's 9px Pillow default font and redraws on a fresh canvas to prevent old title pixels from mixing with new titles."
     }
   ]
 }

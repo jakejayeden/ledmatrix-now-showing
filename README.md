@@ -12,7 +12,9 @@ the films so their showtimes can be read on a 32-pixel-high display.
 - The film title in red and today's available showtimes below it
 - One film per page, rotating through today's programme
 - Ratings and common festival/programme prefixes are removed to keep titles tidy
-- Titles wrap cleanly and long time lists continue on the next page
+- Long titles are shortened with an ellipsis and long time lists continue on the next page
+- Uses the same 9px Pillow default font as the NCT Bus Departures plugin
+- Each frame is drawn on a fresh black canvas, so old title pixels cannot bleed into the next film
 
 The same layout runs at 128x32 and 256x32. At 128 pixels wide the date is
 compact (`22 NOV`); wider panels show the weekday and year.

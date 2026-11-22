@@ -8,6 +8,7 @@ import unicodedata
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 from zoneinfo import ZoneInfo
+from PIL import Image, ImageDraw, ImageFont
 
 from src.plugin_system.base_plugin import BasePlugin
 
@@ -263,80 +264,83 @@ class NowShowingCinemaPlugin(BasePlugin):
 
     def display(self, force_clear=False):
         display = self.display_manager
-        width = display.width
-        height = display.height
+        width = max(1, int(display.width))
+        height = max(1, int(display.height))
         now = self._now()
-        if force_clear:
-            display.clear()
+        font = self._display_font()
 
-        # A compact 3x5 micro-font keeps the full venue label and the date on
-        # the same top row, even on a 128px panel.
-        date_text = now.strftime("%d %b").upper() if width < 180 else now.strftime("%a %d %b %Y").upper()
-        self._draw_micro_text("NOW SHOWING @ SAVOY", 1, 0, (255, 255, 255))
-        date_width = len(date_text) * 4 - 1
-        self._draw_micro_text(date_text, max(1, width - date_width - 1), 0, (255, 255, 255))
-        display.draw.line((0, 6, width - 1, 6), fill=(255, 0, 0))
+        # Match NCT Bus Departures: its 9px Pillow default font and a fresh
+        # black image are also used here. Redrawing onto the old canvas left
+        # pixels from the previous title behind the new title.
+        image = Image.new("RGB", (width, height), (0, 0, 0))
+        draw = ImageDraw.Draw(image)
+        date_text = now.strftime("%d%b").upper() if width < 180 else now.strftime("%a %d %b").upper()
+        date_width = draw.textbbox((0, 0), date_text, font=font)[2]
+        date_x = max(1, width - date_width - 1)
+        header = self._fit_text(draw, "NOW SHOWING @ SAVOY", font, max(1, date_x - 3))
+        draw.text((1, -1), header, font=font, fill=(255, 255, 255))
+        draw.text((date_x, -1), date_text, font=font, fill=(255, 255, 255))
+        draw.line((0, min(10, height - 1), width - 1, min(10, height - 1)), fill=(255, 0, 0))
 
         if not self.savoy_nottingham:
-            lines = [("Savoy Nottingham", "disabled")]
+            title, times = "SAVOY NOTTINGHAM", "DISABLED"
         elif not self.films:
-            lines = [("No screenings today", "" if not self.last_error else "Check connection")]
+            title, times = ("NO SCREENINGS", "" if not self.last_error else "CHECK CONNECTION")
         else:
             film = self.films[self.page_index % len(self.films)]
-            lines = [(film["title"], "  ".join(film["times"]))]
+            title, times = film["title"], " ".join(film["times"])
 
-        film_title, times = lines[0]
-        body_font = getattr(display, "calendar_font", None) or display.regular_font
-        title_lines = self._wrap_to_width(display, film_title, width - 2, body_font)
-        title_pages = [title_lines[i:i + 2] for i in range(0, len(title_lines), 2)] or [[""]]
-        time_pages = self._split_to_width(display, times, width - 2, body_font) if times else [""]
-        page_count = max(len(title_pages), len(time_pages))
-        detail = self.detail_index % page_count
-        title_page = title_pages[min(detail, len(title_pages) - 1)]
-        for line_index, title_line in enumerate(title_page):
-            display.draw_text(title_line, x=1, y=8 + line_index * 7, color=(255, 0, 0), font=body_font)
+        title = self._fit_text(draw, title, font, width - 2)
+        time_pages = self._split_to_width(draw, times, font, width - 2) if times else [""]
+        detail = self.detail_index % len(time_pages)
+        draw.text((1, 12), title, font=font, fill=(255, 0, 0))
         if times:
-            display.draw_text(time_pages[min(detail, len(time_pages) - 1)], x=1, y=23, color=(255, 255, 255), font=body_font)
+            draw.text((1, 22), time_pages[detail], font=font, fill=(255, 255, 255))
 
         if self.films and time.time() - self.last_page_change >= self.display_duration:
-            self.detail_index += 1
-            if self.detail_index >= page_count:
+            if self.detail_index + 1 >= len(time_pages):
                 self.detail_index = 0
                 self.page_index = (self.page_index + 1) % len(self.films)
+            else:
+                self.detail_index += 1
             self.last_page_change = time.time()
+        display.image = image
         display.update_display()
 
     @staticmethod
-    def _wrap_to_width(display, text, max_width, font):
-        """Wrap a title into panel-width lines, preserving word boundaries."""
+    def _display_font():
+        """Use the same Pillow default font and size as NCT Bus Departures."""
+        try:
+            return ImageFont.load_default(size=9)
+        except TypeError:
+            return ImageFont.load_default()
+
+    @staticmethod
+    def _fit_text(draw, text, font, max_width):
+        text = str(text)
+        if draw.textbbox((0, 0), text, font=font)[2] <= max_width:
+            return text
+        while text and draw.textbbox((0, 0), text + "..", font=font)[2] > max_width:
+            text = text[:-1]
+        return text + ".."
+
+    @classmethod
+    def _split_to_width(cls, draw, text, font, max_width):
+        """Keep every showtime visible, paging only if the line is too long."""
         if not text:
             return [""]
-        words = text.split()
-        lines = []
+        pages = []
         current = ""
-        for word in words:
+        for word in text.split():
             candidate = f"{current} {word}".strip()
-            if current and display.get_text_width(candidate, font) > max_width:
-                lines.append(current)
+            if current and draw.textbbox((0, 0), candidate, font=font)[2] > max_width:
+                pages.append(current)
                 current = word
             else:
                 current = candidate
         if current:
-            lines.append(current)
-        return lines or [""]
-
-    @classmethod
-    def _split_to_width(cls, display, text, max_width, font):
-        """Wrap showtimes so every booked start time is shown on a page."""
-        return cls._wrap_to_width(display, text, max_width, font)
-
-    def _draw_micro_text(self, text, x, y, color):
-        for char_index, char in enumerate(text.upper()):
-            glyph = MICRO_FONT.get(char, MICRO_FONT[" "])
-            for row, bits in enumerate(glyph):
-                for col, bit in enumerate(bits):
-                    if bit == "1":
-                        self.display_manager.draw.point((x + char_index * 4 + col, y + row), fill=color)
+            pages.append(current)
+        return pages or [""]
 
     def get_info(self):
         info = super().get_info()
