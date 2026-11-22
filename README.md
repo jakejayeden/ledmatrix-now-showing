@@ -18,7 +18,7 @@ compact (`22 NOV`); wider panels show the weekday and year.
 
 ## Install
 
-In LEDMatrix, open **Plugin Manager  Install from GitHub** and enter:
+In LEDMatrix, open **Plugin Manager > Install from GitHub** and enter:
 
 ```text
 https://github.com/jakejayeden/ledmatrix-now-showing
@@ -47,4 +47,3 @@ dates. If Savoy changes its page structure, the parser may need an update.
 ## Configuration example
 
 See [`example_config.json`](example_config.json).
-

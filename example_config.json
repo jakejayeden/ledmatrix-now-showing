@@ -1,0 +1,8 @@
+{
+  "now-showing-cinema": {
+    "enabled": true,
+    "savoy_nottingham": true,
+    "refresh_minutes": 30,
+    "display_duration": 15
+  }
+}

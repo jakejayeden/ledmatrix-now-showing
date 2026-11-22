@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Now Showing Cinema Settings",
+  "type": "object",
+  "properties": {
+    "enabled": {
+      "type": "boolean",
+      "title": "Enable plugin",
+      "default": true
+    },
+    "savoy_nottingham": {
+      "type": "boolean",
+      "title": "Savoy Nottingham",
+      "description": "Include today's screenings at Savoy Cinema, Nottingham.",
+      "default": true
+    },
+    "refresh_minutes": {
+      "type": "integer",
+      "title": "Refresh interval (minutes)",
+      "description": "How often to check for listing changes.",
+      "minimum": 5,
+      "maximum": 180,
+      "default": 30
+    },
+    "display_duration": {
+      "type": "integer",
+      "title": "Display duration (seconds)",
+      "minimum": 5,
+      "maximum": 120,
+      "default": 15
+    }
+  },
+  "additionalProperties": false
+}
